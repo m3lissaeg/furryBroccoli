@@ -12,61 +12,52 @@ def generar_poblacion(numero_individuos):
 
 
 def generar_matriz(individuo):
-    matriz_inicial = [
+    matriz = [   
         [0,0,0,0],
         [0,0,0,0],
         [0,0,0,0],
         [1,0,0,0]
     ]
-    print("matriz inicial: \n",matriz_inicial)
-    #pos vertical
     i = 3
-    #pos horizontal
     j = 0
-    for cromosoma in individuo:
-        if cromosoma == "U":
-            try:
-                if matriz_inicial[i-1][j] == 0:
-                    matriz_inicial[i-1][j] = 1
-                    i -= 1
-                    print("movimiento: U \n",matriz_inicial)
+    for letra in individuo:
+        if letra == "U":
+            if i -1 >= 0:
+                if matriz[i-1][j] == 0:
+                    matriz[i-1][j] = 1
+                    i = i -1
                 else:
-                    return matriz_inicial
-            except:
-                print("se va a salir")
-                
-        elif cromosoma == "D":
+                    break
+            else:
+                continue
+        elif letra == "D":
             try:
-                if matriz_inicial[i+1][j] == 0:
-                    matriz_inicial[i+1][j] = 1
-                    i += 1
-                    print("movimiento: D \n",matriz_inicial)
+                if matriz[i+1][j] == 0:
+                    matriz[i+1][j] = 1
+                    i = i + 1
                 else:
-                    return matriz_inicial
+                    break
             except:
-                pass
-        elif cromosoma == "R":
+                continue
+        elif letra == "L":
+            if j-1 >= 0:
+                if matriz[i][j-1] == 0:
+                    matriz[i][j-1] = 1
+                    j = j - 1
+                else:
+                    break
+            else:
+                continue
+        elif letra == "R":
             try:
-                if matriz_inicial[i][j+1] == 0:
-                    matriz_inicial[i][j+1] = 1
-                    j += 1
-                    print("movimiento: R \n",matriz_inicial)
+                if matriz[i][j+1] == 0:
+                    matriz[i][j+1] = 1
+                    j = j + 1
                 else:
-                    return matriz_inicial
+                    break
             except:
-                pass
-        elif cromosoma == "L":
-            try:
-                if matriz_inicial[i][j-1] == 0:
-                    matriz_inicial[i][j-1] = 1
-                    j -= 1
-                    print("movimiento: L \n",matriz_inicial)
-                else:
-                    return matriz_inicial
-            except:
-                pass
-
-    return matriz_inicial
+                continue
+    return matriz
 
 def contar_ceros(matriz):
     conteo = 0
@@ -77,7 +68,7 @@ def contar_ceros(matriz):
     return conteo
 
 
-def adaptados(poblacion):
+def adaptados(poblacion,n_ceros):
     aux = []
     adaptados = []
     for individuo in poblacion:
@@ -89,14 +80,14 @@ def adaptados(poblacion):
         }
         aux.append(individuo_dict)
     for individuo in aux:
-        if individuo["n_ceros"] <= 10:
-            adaptados.append(individuo)
+        if individuo["n_ceros"] < 16-n_ceros:
+            adaptados.append(individuo["gen"])
     return adaptados
 
 def reproducir(poblacion):
     padre = random.choice(poblacion)
     madre = random.choice(poblacion)
-    hijo = madre[0:int(len(madre)/2)] + padre[int(len(padre)/2):]
+    hijo = madre[:int(len(madre)/2)] + padre[int(len(padre)/2):]
     return hijo
 
 def factor_mutacion(individuo):
@@ -105,26 +96,26 @@ def factor_mutacion(individuo):
     vocabulario = ['U','D','L','R']
     if dado <= 0.25:
         pos = random.randint(0,16)
-        vocabulario.remove(individuo[pos])
+        try:
+            vocabulario.remove(individuo[pos])
+        except:
+            pass
         salida = individuo[:pos] + random.choice(vocabulario) + individuo[pos+1:]
         return salida
     else:
         return individuo
 
+def imprimir_matriz(matriz):
+    for fila in matriz:
+        print(fila)
 
-
-generaciones = 5
+generaciones = 13
 i = 1
-#poblacion = generar_poblacion(10)
-#while i <= generaciones:
-#    print("poblacion inicial \n",poblacion,"\n")
-#    poblacion = adaptados(poblacion)
-#    print("poblacion adaptada \n",poblacion,"\n")
-#    poblacion = reproducir(poblacion)
-#    for individuo in poblacion:
-#        individuo = factor_mutacion(individuo)
-#    i += 1
-#print(poblacion)
-a = generar_matriz("RRRR")
-
-        
+poblacion = generar_poblacion(10000)
+while i <= generaciones:
+    poblacion = adaptados(poblacion,i)
+    poblacion.append(reproducir(poblacion))
+    for individuo in poblacion:
+        individuo = factor_mutacion(individuo)
+    i += 1
+print(poblacion)
